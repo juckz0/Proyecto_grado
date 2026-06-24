@@ -12,4 +12,5 @@ public class ActividadTareaDto {
 	private String tarea_id;
 	private String actividad_desc;
 	private Long tiempo_reg;
+	private String fecha_registro;
 }

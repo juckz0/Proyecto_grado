@@ -45,18 +45,18 @@ public class TareaService {
 	@Transactional
 	public TareaDto insertarTarea(TareaDto request, String token) {
 		User user = getUsuarioActual(token);
-		validarId(request.getTarea_id());
+		String tareaId = generarSiguienteTareaId();
 
-		if (tareaRepository.existsById(request.getTarea_id())) {
+		if (tareaRepository.existsById(tareaId)) {
 			throw new ApiException(
 					"TAREA_ALREADY_EXISTS",
-					"La tarea '" + request.getTarea_id() + "' ya existe",
+					"La tarea '" + tareaId + "' ya existe",
 					HttpStatus.CONFLICT
 					);
 		}
 
 		Tarea tarea = Tarea.builder()
-				.tarea_id(request.getTarea_id())
+				.tarea_id(tareaId)
 				.tarea_des(request.getTarea_des())
 				.fecha_ini(parseDate(request.getFecha_ini(), "fecha_ini"))
 				.fecha_fin(parseDate(request.getFecha_fin(), "fecha_fin"))
@@ -172,6 +172,30 @@ public class TareaService {
 					"El id de la tarea es obligatorio",
 					HttpStatus.BAD_REQUEST
 					);
+		}
+	}
+
+	private synchronized String generarSiguienteTareaId() {
+		long maxId = tareaRepository.findAll().stream()
+				.map(Tarea::getTarea_id)
+				.map(this::parseLongOrNull)
+				.filter(id -> id != null)
+				.mapToLong(Long::longValue)
+				.max()
+				.orElse(0L);
+
+		return String.valueOf(maxId + 1);
+	}
+
+	private Long parseLongOrNull(String value) {
+		if (value == null || value.isBlank()) {
+			return null;
+		}
+
+		try {
+			return Long.valueOf(value);
+		} catch (NumberFormatException ex) {
+			return null;
 		}
 	}
 

@@ -1,5 +1,7 @@
 package com.aplicacion.login.entity;
 
+import java.sql.Date;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -19,4 +21,7 @@ public class ActividadTarea {
 
 	@Column(name = "tiempo_reg", nullable = false)
 	private Long tiempoReg;
+
+	@Column(name = "fecha_registro", nullable = false)
+	private Date fechaRegistro;
 }

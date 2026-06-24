@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
 
 @Service
@@ -61,6 +62,8 @@ public class ActividadTareaService {
 					);
 		}
 
+		Date fechaRegistro = parseDate(request.getFecha_registro(), "fecha_registro");
+
 		ActividadTareaId id = new ActividadTareaId(user.getId(), tarea.getTarea_id(), request.getActividad_desc());
 
 		if (actividadRepository.existsById(id)) {
@@ -74,6 +77,7 @@ public class ActividadTareaService {
 		ActividadTarea actividad = ActividadTarea.builder()
 				.id(id)
 				.tiempoReg(request.getTiempo_reg())
+				.fechaRegistro(fechaRegistro)
 				.build();
 
 		return toDto(actividadRepository.save(actividad));
@@ -134,7 +138,24 @@ public class ActividadTareaService {
 				actividad.getId().getUserId(),
 				actividad.getId().getTareaId(),
 				actividad.getId().getActividadDesc(),
-				actividad.getTiempoReg()
+				actividad.getTiempoReg(),
+				actividad.getFechaRegistro() != null ? actividad.getFechaRegistro().toString() : null
 				);
+	}
+
+	private Date parseDate(String value, String fieldName) {
+		if (value == null || value.isBlank()) {
+			return new Date(System.currentTimeMillis());
+		}
+
+		try {
+			return Date.valueOf(value);
+		} catch (IllegalArgumentException ex) {
+			throw new ApiException(
+					"INVALID_DATE",
+					"El campo " + fieldName + " debe tener formato yyyy-MM-dd",
+					HttpStatus.BAD_REQUEST
+					);
+		}
 	}
 }
